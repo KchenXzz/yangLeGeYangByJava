@@ -12,6 +12,7 @@ import java.util.Random;
 /**
  * //TODO
  *
+ * 地图工具类
  * @author kcx
  * @version v1.0.0
  * @description //TODO
@@ -23,7 +24,11 @@ public class MapUtil {
     }
 
     //所有图层上的所有卡片  再减去置空的卡片就是游戏界面上的卡片
-    private static int allCard = 6 * 6 * 6;
+    private static int allCard;
+
+    //每个图层的默认大小  6*6
+    private static final int ROW = 6;
+    private static final int COL = 6;
 
     /**
      * 遍历地图每一层上的每一个卡片
@@ -55,69 +60,62 @@ public class MapUtil {
     }
 
     /**
-     * 构建地图 其实只能6层，改变还要改代码
+     * 构建地图
+     * 可以改变层数了
      * @param floorHeight 层数
      * @return 地图
      */
-    public static Map build(Integer floorHeight){
+    public static Map build(Integer floorHeight) {
 
         Map map = new Map();
+
+        //未稀疏化的卡片总数
+        allCard = floorHeight * ROW * COL;
 
         map.setFloorHeight(floorHeight);
 
         List<Layer> list = map.getList();
 
-        Random random=new Random();
+        Random random = new Random();
 
-        Layer layer1 = LayerUtil.buildLayer(6, 6);
-        Layer layer2 = LayerUtil.buildLayer(6, 6);
-        Layer layer3 = LayerUtil.buildLayer(6, 6);
-        Layer layer4 = LayerUtil.buildLayer(6, 6);
-        Layer layer5 = LayerUtil.buildLayer(6, 6);
-        Layer layer6 = LayerUtil.buildLayer(6, 6);
+        //两个暂存变量 要先置空
+        Layer layerOf1 = null;
+        Layer layerOf2 = null;
 
 
-        //随机偏移量 才能看起来不整齐
-        int bound1 = random.nextInt(80) + 50;
-        int bound2 = random.nextInt(85) + 50;
-        int bound3 = random.nextInt(80) + 50;
+        for (int i = 0; i < floorHeight; i++) {
 
-        //分别设置每个图层
-        layer1.setOffSetX(random.nextInt(bound1) - 10);
-        layer1.setOffSetY(random.nextInt(bound1 + 30));
+            //构建图层
+            Layer layer = LayerUtil.buildLayer(ROW, COL);
 
-        layer2.setOffSetX(random.nextInt(bound2) - 10);
-        layer2.setOffSetY(random.nextInt(bound2));
+//            int bound1 = random.nextInt(8)*10 + 50;
+            int bound1 = 50;
 
-        layer3.setOffSetX(random.nextInt(bound3 - 10));
-        layer3.setOffSetY(random.nextInt(bound3 + 30));
-
-        layer4.setOffSetX(random.nextInt(bound1 - 10));
-        layer4.setOffSetY(random.nextInt(bound1));
-
-        layer5.setOffSetX(random.nextInt(bound2 - 5));
-        layer5.setOffSetY(random.nextInt(bound2 + 30));
-
-        layer6.setOffSetX(random.nextInt(bound3 - 15));
-        layer6.setOffSetY(random.nextInt(bound3));
+//            //分别设置每个图层的偏移量
+//            layer.setOffSetX(random.nextInt(bound1));
+//            layer.setOffSetY(random.nextInt(bound1 + 30));
 
 
-        //为图层构建链式关系
-        layer6.setParent(layer5);
-        layer5.setParent(layer4);
-        layer4.setParent(layer3);
-        layer3.setParent(layer2);
-        layer2.setParent(layer1);
-        layer1.setParent(null);//说明这层是顶层
+            //一个暂存变量会覆盖，没有效果
+            //用两个变量来交替暂存，这样就能构建图层的链式结构！
+            if (i%2==0){//偶
+                //分别设置每个图层的偏移量  修改了随即偏移量，变成了同样的固定遮盖偏移量
+                layer.setOffSetX(bound1+29);
+                layer.setOffSetY(bound1+33);
+                layerOf1 = layer;
+                layer.setParent(layerOf2);//链式关系
+            }else { //奇数
+                //分别设置每个图层的偏移量
+                layer.setOffSetX(bound1);
+                layer.setOffSetY(bound1);
+                layerOf2 = layer;
+                layer.setParent(layerOf1);//链式关系
+            }
 
+            //添加到集合
+            list.add(layer);
+        }
 
-        //添加到集合
-        list.add(layer1);
-        list.add(layer2);
-        list.add(layer3);
-        list.add(layer4);
-        list.add(layer5);
-        list.add(layer6);
 
         //遍历一下，得到所有卡片的总数
         visitGetNullCard(map);
@@ -127,12 +125,13 @@ public class MapUtil {
 
     /**
      * 比较卡片又没有被图层遮盖，被遮盖
-     * @param card 卡片
+     *
+     * @param card  卡片
      * @param layer 图层
      * @return 被遮盖true 没有false
      */
 
-    public static boolean compare(Card card,Layer layer){
+    public static boolean compare(Card card, Layer layer) {
 
         Cell[][] cells = layer.getCells();
         for (int row = 0; row < cells.length; row++) {
@@ -140,13 +139,13 @@ public class MapUtil {
                 Cell cell = cells[row][col];
 
                 //如果当前格子有牌，就要判断，
-                if (cell.isState()){
+                if (cell.isState()) {
                     //这是Java里的比较矩阵有没有交际的方法
                     Rectangle bounds = card.getBounds();
                     Rectangle bounds1 = cell.getCard().getBounds();
 
                     //ture 说明被遮盖
-                    if (bounds1.intersects(bounds)){
+                    if (bounds1.intersects(bounds)) {
                         return true;
                     }
                 }//无牌，就不用比较了，直接去看下一个格子
@@ -154,11 +153,11 @@ public class MapUtil {
         }
 
         //如果要是没有父亲，说明是顶层了，就没有遮盖
-        if (layer.getParent()==null){
+        if (layer.getParent() == null) {
             return false;
-        }else {
+        } else {
             //再次递归去调用
-            return compare(card,layer.getParent());
+            return compare(card, layer.getParent());
         }
     }
 

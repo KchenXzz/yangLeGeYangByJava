@@ -112,6 +112,9 @@ public class Card extends Component{
 
                     //不太好的定义方式，但是从高card去找它的map太复杂
                     YangLeGeYang.map.compareAll();
+
+                    //
+                   // cardBox.isWin();
                 }
 
 

@@ -4,11 +4,14 @@ import yangLeGeYang.model.*;
 import yangLeGeYang.util.MapUtil;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
 /**
  * //TODO
  * 游戏主界面
+ *
  * @author kcx
  * @version v1.0.0
  * @description //TODO
@@ -17,12 +20,18 @@ import java.util.List;
 public class YangLeGeYang extends JFrame {
 
 
+    public static Map map; //几层都可以
 
-    public static Map map= MapUtil.build(6);//目前只能是6层，改层数还要去改maputil里的代码
-    public YangLeGeYang() {
+    private  int floor;
+
+    public YangLeGeYang(int floorHeight) {
+
+        floor=floorHeight;
+
+        map = MapUtil.build(floorHeight);
 
         //初始化面板
-        initFrame();
+        initFrame(floorHeight);
 
         //渲染图层
         render();
@@ -36,6 +45,68 @@ public class YangLeGeYang extends JFrame {
         //背景音乐
         new Music().music();
 
+    }
+
+
+    /**
+     * 判断是否赢了
+     */
+    public boolean isWin() {
+
+        YangLeGeYang start = this;
+        int cardSum = MapUtil.getAllCard();
+        if (Card.getCount() == cardSum) {
+            //创建一个弹框对象
+            JDialog jDialog = new JDialog();
+            //给弹框设置大小
+            jDialog.setSize(237, 222);
+            //让弹框置顶
+            jDialog.setAlwaysOnTop(true);
+            //让弹框居中
+            jDialog.setLocationRelativeTo(null);
+            //弹框不关闭永远无法操作下面的界面
+            jDialog.setModal(true);
+
+            //设置不可变大小
+            jDialog.setResizable(false);
+
+            jDialog.setTitle("win！");
+
+            jDialog.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    // 在窗口关闭时执行自定义操作
+                    //System.exit(0);
+
+                    jDialog.dispose();
+                    start.dispose();
+                    floor++;
+                    new YangLeGeYang(floor);
+                }
+            });
+
+            //创建Jlabel对象管理文字并添加到弹框当中
+            JLabel warning = new JLabel(new ImageIcon("res\\赢.了.png"));
+
+            warning.setSize(237, 185);
+
+            jDialog.getContentPane().add(warning);
+            //让弹框展示出来
+            jDialog.setVisible(true);
+
+            jDialog.getContentPane().add(warning);
+
+            //让弹框展示出来
+            jDialog.setVisible(true);
+            //退出程序
+            //System.exit(0);
+
+
+
+            return true;
+
+
+        } else return false;
     }
 
     /**
@@ -54,12 +125,12 @@ public class YangLeGeYang extends JFrame {
 //        // 要修改card类的坐标
             for (int row = 0; row < cells.length; row++) {
                 for (int col = 0; col < cells[row].length; col++) {
-                    int x=col*59+layer.getOffSetX()+15;
-                    int y=row*66+layer.getOffSetY()+80;
+                    int x = col * 59 + layer.getOffSetX();
+                    int y = row * 66 + layer.getOffSetY() + 40;
                     Card card1 = cells[row][col].getCard();
                     //只有不是被置空才能添加到界面
-                    if (!card1.getName().equals("空空")){
-                        card1.setBounds(x,y,59,66);
+                    if (!card1.getName().equals("空空")) {
+                        card1.setBounds(x, y, 59, 66);
                         this.getContentPane().add(card1);
                     }
 
@@ -81,6 +152,7 @@ public class YangLeGeYang extends JFrame {
     }
 
 
+
     /**
      * 窗口自动刷新线程
      */
@@ -91,7 +163,10 @@ public class YangLeGeYang extends JFrame {
             @Override
             public void run() {
                 while (true) {
+                    //自动刷新界面
                     start.repaint();
+                    //随时判断是否胜利
+                   start.isWin();
                     try {
                         Thread.sleep(40);
                     } catch (InterruptedException e) {
@@ -108,10 +183,10 @@ public class YangLeGeYang extends JFrame {
     /**
      * 界面初始
      */
-    private void initFrame() {
+    private void initFrame(int floorHeight) {
 
         //设置界面的标题
-        this.setTitle("羊了个羊！");
+        this.setTitle("羊了个羊！第" + (floorHeight - 1) + "关");
         //大小
         this.setSize(492, 822);
         //设置不可变大小
@@ -121,7 +196,8 @@ public class YangLeGeYang extends JFrame {
         //设置界面居中
         this.setLocationRelativeTo(null);
         //设置关闭模式
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+//        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        //this.setDefaultCloseOperation(JFrame.);
         //取消默认的居中放置，只有取消了才会按照XY轴的形式添加组件
         this.setLayout(null);
 

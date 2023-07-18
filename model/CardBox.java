@@ -71,7 +71,7 @@ public class CardBox {
                             Thread.sleep(500);
                             delCard(s);
                             Thread.sleep(500);
-                            isWin();
+//                            isWin();
                             paint();
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
@@ -128,7 +128,7 @@ public class CardBox {
             //创建一个弹框对象
             JDialog jDialog = new JDialog();
             //给弹框设置大小
-            jDialog.setSize(244, 299);
+            jDialog.setSize(256,268);
 
             //让弹框置顶
             jDialog.setAlwaysOnTop(true);
@@ -155,7 +155,7 @@ public class CardBox {
             //创建Jlabel对象管理文字并添加到弹框当中
             JLabel warning = new JLabel(new ImageIcon("res\\寄.了.png"));
 
-            warning.setSize(244, 299);
+            warning.setSize(256,268);
 
             jDialog.getContentPane().add(warning);
             //让弹框展示出来
@@ -164,55 +164,6 @@ public class CardBox {
         }
     }
 
-    /**
-     * 判断是否赢了
-     */
-    public void isWin() {
-        int cardSum = MapUtil.getAllCard();
-        if (Card.getCount() == cardSum) {
-            //创建一个弹框对象
-            JDialog jDialog = new JDialog();
-            //给弹框设置大小
-            jDialog.setSize(237, 222);
-            //让弹框置顶
-            jDialog.setAlwaysOnTop(true);
-            //让弹框居中
-            jDialog.setLocationRelativeTo(null);
-            //弹框不关闭永远无法操作下面的界面
-            jDialog.setModal(true);
-
-            //设置不可变大小
-            jDialog.setResizable(false);
-
-            jDialog.setTitle("win！");
-
-            jDialog.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    // 在窗口关闭时执行自定义操作
-                    System.exit(0);
-                }
-            });
-
-            //创建Jlabel对象管理文字并添加到弹框当中
-            JLabel warning = new JLabel(new ImageIcon("res\\赢.了.png"));
-
-            warning.setSize(237, 185);
-
-            jDialog.getContentPane().add(warning);
-            //让弹框展示出来
-            jDialog.setVisible(true);
-
-            jDialog.getContentPane().add(warning);
-
-            //让弹框展示出来
-            jDialog.setVisible(true);
-            //退出程序
-            System.exit(0);
-
-
-        }
-    }
 
 
 

@@ -59,7 +59,7 @@ public class Layer {
 
 
     /**
-     * 初始化
+     * 初始化    最好是构建 6*6大小的图层，要不然其他地方还要改
      * @param rowNum 行
      * @param colNum 列
      */
