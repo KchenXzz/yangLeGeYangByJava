@@ -30,7 +30,7 @@ public class Start {
         那么，iswin也要改的
          */
 
-        new YangLeGeYang(1);
+        new YangLeGeYang(2);
 
 
 

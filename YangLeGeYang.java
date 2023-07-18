@@ -22,11 +22,18 @@ public class YangLeGeYang extends JFrame {
 
     public static Map map; //几层都可以
 
-    private  int floor;
+    //关卡数
+    private static int level;
+
+    //结束线程
+    private boolean isRunning = true;
+
+//    层数
+    private int floor;
 
     public YangLeGeYang(int floorHeight) {
 
-        floor=floorHeight;
+        floor = floorHeight;
 
         map = MapUtil.build(floorHeight);
 
@@ -47,15 +54,36 @@ public class YangLeGeYang extends JFrame {
 
     }
 
+    /**
+     * 是否进入下一关
+     * @return 是否
+     */
+    private boolean isNext() {
+        YangLeGeYang start = this;
+        int cardSum = MapUtil.getAllCard();
+        if (Card.getCount() == cardSum) {
+            //关闭当前窗口
+            start.dispose();
+            //增加一层地图
+            floor++;
+            //关闭刷新线程
+            isRunning=false;
+            //重置步数
+            Card.setCount(0);
+            //新建界面
+            new YangLeGeYang(floor);
+            return true;
+        }
+        return false;
+    }
 
     /**
      * 判断是否赢了
      */
-    public boolean isWin() {
+    public void win() {
 
         YangLeGeYang start = this;
-        int cardSum = MapUtil.getAllCard();
-        if (Card.getCount() == cardSum) {
+
             //创建一个弹框对象
             JDialog jDialog = new JDialog();
             //给弹框设置大小
@@ -76,12 +104,7 @@ public class YangLeGeYang extends JFrame {
                 @Override
                 public void windowClosing(WindowEvent e) {
                     // 在窗口关闭时执行自定义操作
-                    //System.exit(0);
-
-                    jDialog.dispose();
-                    start.dispose();
-                    floor++;
-                    new YangLeGeYang(floor);
+                    System.exit(0);
                 }
             });
 
@@ -103,10 +126,6 @@ public class YangLeGeYang extends JFrame {
 
 
 
-            return true;
-
-
-        } else return false;
     }
 
     /**
@@ -152,29 +171,43 @@ public class YangLeGeYang extends JFrame {
     }
 
 
-
     /**
      * 窗口自动刷新线程
      */
     private void autoFlushed() {
 
         YangLeGeYang start = this;
-        new Thread(new Runnable() {
+        // synchronized (YangLeGeYang.class) {
+        //自动刷新界面
+        //随时判断是否进入下一关
+        //判断是不是最后一罐了
+        //赢了
+        // }
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
+                // synchronized (YangLeGeYang.class) {
+                while (isRunning) {
                     //自动刷新界面
                     start.repaint();
-                    //随时判断是否胜利
-                   start.isWin();
+                    //随时判断是否进入下一关
+                    if (start.isNext()) {
+                        level++;
+                        //判断是不是最后一罐了
+                        if (level == 6) {
+                            win();//赢了
+                        }
+                    }
                     try {
                         Thread.sleep(40);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                 }
+                // }
             }
-        }).start();
+        });
+        thread.start();
 
 
     }

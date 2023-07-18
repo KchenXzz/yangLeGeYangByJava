@@ -38,6 +38,10 @@ public class Card extends Component{
     //所有卡片的移动次数
     private static int count=0;
 
+    public static void setCount(int count) {
+        Card.count = count;
+    }
+
     public static int getCount() {
         return count;
     }
